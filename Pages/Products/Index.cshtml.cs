@@ -32,10 +32,10 @@ namespace ecommerce_dotnet.Pages.Products
         public async Task<IActionResult> OnPostAsync(string ProductId)
         {
             var session = HttpContext.Session;
-            var userId = session.GetString("userId") ?? Guid.NewGuid().ToString();
+            var userId = session.GetString("UserId") ?? Guid.NewGuid().ToString();
             session.SetString("UserId", userId);
 
-            var cart = await _context.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
+            var cart = await _context.Cart.Include(c => c.Products).FirstOrDefaultAsync(c => c.UserId == userId);
      
             if (cart == null)
             {
@@ -58,27 +58,34 @@ namespace ecommerce_dotnet.Pages.Products
 
             if (product != null)
             {
-                var cartItem = cart.Products.FirstOrDefault(p => p.Product == product);
-                if (cartItem == null)
-                {
-                    cartItem = new CartItem()
-                    {
-                        CartItemId = Guid.NewGuid().ToString(),
-                        CreatedAt = DateTime.Now,
-                        Product = product,
-                        Quantity = 1,
-                        Subtotal = product.Price
-                    };
+                    var cartItem = cart.Products.FirstOrDefault(p => p != null && p.Product != null && p.Product.ProductId == ProductId);
 
-                    cart.Products.Add(cartItem);
-                }
-                else
-                {
-                    cartItem.Subtotal += product.Price;
-                    cartItem.Quantity++;
-                }
-                cart.Total += product.Price;
-                await _context.SaveChangesAsync();
+                    if (cartItem != null)
+                    {
+                        cartItem.Subtotal += product.Price;
+                        cartItem.Quantity++;
+                    }
+                    else
+                    {
+                        cartItem = new CartItem()
+                        {
+                            CartItemId = Guid.NewGuid().ToString(),
+                            CreatedAt = DateTime.Now,
+                            Product = product,
+                            Quantity = 1,
+                            Subtotal = product.Price
+                        };
+
+                        cart.Products.Add(cartItem);
+                    }
+
+                    cart.Total += product.Price;
+                    await _context.SaveChangesAsync();
+                
+            }
+            else
+            {
+                Console.WriteLine("Product is NULL");
             }
 
             return RedirectToPage("./Index");
