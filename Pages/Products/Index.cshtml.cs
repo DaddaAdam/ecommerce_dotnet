@@ -88,7 +88,7 @@ namespace ecommerce_dotnet.Pages.Products
                 Console.WriteLine("Product is NULL");
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("/Panier/Index");
         }
     }
 }
