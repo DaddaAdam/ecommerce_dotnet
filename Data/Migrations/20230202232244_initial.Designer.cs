@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecommerce_dotnet.Data;
 
@@ -11,9 +12,11 @@ using ecommerce_dotnet.Data;
 namespace ecommercedotnet.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230202232244_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,9 +252,6 @@ namespace ecommercedotnet.Data.Migrations
                     b.Property<string>("CartItemId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CartId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -266,8 +266,6 @@ namespace ecommercedotnet.Data.Migrations
 
                     b.HasKey("CartItemId");
 
-                    b.HasIndex("CartId");
-
                     b.HasIndex("ProductId");
 
                     b.ToTable("CartItem");
@@ -276,6 +274,9 @@ namespace ecommercedotnet.Data.Migrations
             modelBuilder.Entity("ecommerce_dotnet.Models.Product", b =>
                 {
                     b.Property<string>("ProductId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CartId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -297,6 +298,8 @@ namespace ecommercedotnet.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("CartId");
 
                     b.ToTable("Product");
                 });
@@ -354,15 +357,18 @@ namespace ecommercedotnet.Data.Migrations
 
             modelBuilder.Entity("ecommerce_dotnet.Models.CartItem", b =>
                 {
-                    b.HasOne("ecommerce_dotnet.Models.Cart", null)
-                        .WithMany("Products")
-                        .HasForeignKey("CartId");
-
                     b.HasOne("ecommerce_dotnet.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ecommerce_dotnet.Models.Product", b =>
+                {
+                    b.HasOne("ecommerce_dotnet.Models.Cart", null)
+                        .WithMany("Products")
+                        .HasForeignKey("CartId");
                 });
 
             modelBuilder.Entity("ecommerce_dotnet.Models.Cart", b =>
